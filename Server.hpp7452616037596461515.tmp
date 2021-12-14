@@ -1,0 +1,126 @@
+AsyncWebServer server(80);
+/*#include "pags.hpp"*/
+
+
+void control(AsyncWebServerRequest *request) {
+  /* String s;
+    String led = server.arg(String("led"));
+    if (led.length() > 0) {
+
+     if (led == "1") {
+
+       int estado_led1 = digitalRead(4);
+       digitalWrite(4, !estado_led1);
+       estado_led1 = digitalRead(4);
+       if (estado_led1 == 1) {
+         clase1 = "ON";
+       } else {
+         clase1 = "OFF";
+       }
+
+     }
+
+     if (led == "2") {
+
+       int estado_led2 = digitalRead(0);
+       digitalWrite(0, !estado_led2);
+       estado_led2 = digitalRead(0);
+       if (estado_led2 == 1) {
+         clase2 = "ON";
+       } else {
+         clase2 = "OFF";
+       }
+
+     }
+
+
+    }
+
+    s = p_inicio();*/
+
+
+
+
+  leer(0).toCharArray(ssid, 100);
+  leer(100).toCharArray(password, 100);
+  leer(201).toCharArray(state, 1);
+
+  Serial.println(leer(0));
+  Serial.println(leer(100));
+  Serial.println(leer(201));
+
+  
+  Serial.println(ssid);
+  Serial.println(password);
+  Serial.println(state);
+
+  request->send(200, "text/html", "<h1>Hola mundo</h1>" );
+
+}
+
+void feedRequest(AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total)
+{
+  String bodyContent = GetBodyContent(data, len);
+  StaticJsonDocument<200> doc;
+  DeserializationError error = deserializeJson(doc, bodyContent);
+  if (error) {
+    request->send(400);
+    return;
+  }
+
+  String string_data = doc["data"];
+  if (leer(201) == "0") {
+    grabar(0, doc["data"]["ssid"]);
+    grabar(100, doc["data"]["pass"]);
+
+    Serial.println("SSID grabado en la EPROM");
+    grabar(201, "3");
+    Serial.println("EPROM: state = 3");
+  }
+
+  request->send(200, "text/plain", "Success");
+}
+
+void resetRequest(AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total)
+{
+  String bodyContent = GetBodyContent(data, len);
+  StaticJsonDocument<200> doc;
+  DeserializationError error = deserializeJson(doc, bodyContent);
+  if (error) {
+    request->send(400);
+    return;
+  }
+
+
+  String string_data = doc["data"];
+  if (doc["data"]["password"] == moduleId) {
+    EEPROM.end();
+    ESP.restart();
+  }
+
+  request->send(200, "text/plain", "Success");
+}
+
+void InitServer()
+{
+  server.on("/", control);
+  server.on("/action", HTTP_POST, control);
+  server.on("/feed", HTTP_POST, [](AsyncWebServerRequest * request) {}, NULL, feedRequest);
+  server.on("/reset", HTTP_POST, [](AsyncWebServerRequest * request) {}, NULL, resetRequest);
+
+  if (!MDNS.begin(dms)) {
+    Serial.println("Error setting up MDNS responder!");
+    while (1) {
+      delay(1000);
+    }
+  }
+  Serial.println("mDNS responder started");
+  Serial.println(dms);
+
+  // Iniciar servidor
+  server.begin();
+  Serial.println("TCP server started");
+
+  // Add service to MDNS-SD
+  MDNS.addService("http", "tcp", 80);
+}
