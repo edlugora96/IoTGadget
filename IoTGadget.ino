@@ -6,9 +6,8 @@
 
 #include "config.h"  // Sustituir con datos de vuestra red
 #include "ESP8266_Utils.hpp"
-#include "Server.hpp"
 #include "Net_Connections.hpp"
-
+#include "Server.hpp"
 
 void setup(void)
 {
@@ -30,31 +29,80 @@ void setup(void)
   if (leer(201) == NULL) {
     grabar(201, "0");
   }
-
+  //resetESP();
+  //grabar(201, "3");
   wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
   wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
-
-  if (leer(201) != "0") {
-    ConnectWiFi_STA();
+  Serial.println(WiFi.softAPIP());
+  if (leer(201) == "0" || leer(201) == "3" || leer(201) == "4" || leer(201) == "6") {
+    ConnectWiFi_STA_AP();
   } else {
-    ConnectWiFi_AP();
+    ConnectWiFi_STA();
   }
 
   InitServer();
-}
 
+}
+int unnlockTime = 0;
+int reconections = 0;
+int apFlag = 0;
 int i = 0;
+int working = 0;
 void loop()
 {
-  if (leer(201) != "0") {
+  if (leer(201) == "1") {
     if (WiFi.status() != WL_CONNECTED) {
       ConnectWiFi_STA();
     }
   }
-  if (leer(202) == "C") {
+  if (leer(201) == "3") {
+    if (WiFi.status() != WL_CONNECTED) {
+      if (reconections > 5) {
+        ConnectWiFi_STA_AP();
+      } else {
+        ConnectWiFi_STA();
+      }
 
+      reconections++;
+    } else {
+      reconections = 0;
+    }
+  } else {
+    reconections = 0;
+  }
+
+  if (leer(201) == "5") {
+    if (unnlockTime > 18) {
+      grabar(201, "1");
+      unnlockTime = 0;
+      //ESP.reset();
+    }
+    unnlockTime++;
+  }
+
+  if (leer(201) == "6") {
+    if (unnlockTime > 300 ) {
+      //grabar(201, "1");
+      apFlag = 0;
+      //WiFi.disconnect();
+      //ConnectWiFi_STA();
+      ESP.reset();
+    }
+    if (apFlag == 0) {
+      ConnectWiFi_STA_AP();
+      apFlag = 1;
+    }
+    unnlockTime++;
+  }
+
+
+  if (leer(202) == "C") {
+    if (working == 1) {
+      i = 0;
+      working = 0;
+    }
     if (i == 0) {
-      grabar(201, "2");
+      working = 1;
       grabar(202, "C");
       digitalWrite(GATE, HIGH);
       delay(100);
@@ -71,8 +119,12 @@ void loop()
 
   }
   if (leer(202) == "P") {
+    if (working == 1) {
+      i = 0;
+      working = 0;
+    }
     if (i == 0) {
-      grabar(201, "2");
+      working = 1;
       grabar(202, "P");
       digitalWrite(GATE, HIGH);
       delay(100);
@@ -97,8 +149,12 @@ void loop()
     }
   }
   if (leer(202) == "M") {
+    if (working == 1) {
+      i = 0;
+      working = 0;
+    }
     if (i == 0) {
-      grabar(201, "2");
+      working = 1;
       grabar(202, "M");
       digitalWrite(GATE, HIGH);
       delay(100);
@@ -123,8 +179,12 @@ void loop()
     }
   }
   if (leer(202) == "A") {
+    if (working == 1) {
+      i = 0;
+      working = 0;
+    }
     if (i == 0) {
-      grabar(201, "2");
+      working = 1;
       grabar(202, "A");
       digitalWrite(GATE, HIGH);
       delay(100);

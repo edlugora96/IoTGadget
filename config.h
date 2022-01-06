@@ -1,17 +1,21 @@
 #define GATE D1
 
 const char* ssidAP    = "L59a58ba8";
-const char* passwordAP    = "123456789";
-/*const char* passwordAP = "QhY1^GUxaWXb";*/
+//const char* passwordAP    = "123456789";
+const char* passwordAP = "QhY1^GUxaWXb";
 String ssiPP = "Hola Mundo";
 const char* moduleId = "59a58ba9-cbac-43f6-a32a-d427fc03605e";
 char* state;
 char command[5];
+
+int apStarted = 0;
 // 0 -> Sin conexion - Sin informacion - esta en modo AP
 // 1 -> Conectado y disponoble
 // 2 -> modulo ocupado
 // 3 -> Sin conexion - Con informacion
-
+// 4 -> Configurando Wi-Fi
+// 5 -> Configurando en espera Wi-Fi
+// 6 -> Gadget desbloqueado
 char ssid[100];
 char password[100];
 const char* dms = "isougmusivia";

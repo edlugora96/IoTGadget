@@ -1,29 +1,16 @@
-void onWifiConnect(const WiFiEventStationModeGotIP& event) {
-  Serial.println();
-  Serial.println("Connected to Wi-Fi sucessfully.");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-  InitServer();
-  grabar(201, "1");
-}
-
-void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
-  Serial.println();
-  grabar(201, "3");
-  Serial.println("Disconnected from Wi-Fi, trying to connect...");
-  WiFi.disconnect();
-  WiFi.begin(ssid, password);
-}
-
 //-----------------Función Coneccion STA------------------------
 void ConnectWiFi_STA(bool useStaticIP = false)
 {
   leer(0).toCharArray(ssid, 100);
   leer(100).toCharArray(password, 100);
   Serial.println("");
+  IPAddress local_IP;
+  local_IP.fromString(leer(300));
+  Serial.println(local_IP);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  WiFi.config(ip, gateway, subnet);
+  WiFi.config(local_IP, gateway, subnet);
+  apStarted = 0;
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(100);
@@ -50,7 +37,7 @@ void ConnectWiFi_AP(bool useStaticIP = false)
     delay(100);
   }
   //WiFi.softAPConfig(ip, gateway, subnet);
-
+  //InitServer();
   Serial.println("");
   Serial.print("Iniciado AP:\t");
   Serial.println(ssid);
@@ -61,41 +48,26 @@ void ConnectWiFi_AP(bool useStaticIP = false)
 
 
 //-----------------Función Coneccion STA_AP------------------------
-void ConnectWifi_STA_AP() {
+void ConnectWiFi_STA_AP() {
+  if (apStarted == 0) {
+    WiFi.mode(WIFI_AP_STA);
+    WiFi.softAP(ssidAP, passwordAP);
 
-  // Begin Access Point
-  WiFi.mode(WIFI_AP_STA);
-  WiFi.softAP(ssidAP, passwordAP);
-
-  leer(0).toCharArray(ssid, 100);
-  leer(100).toCharArray(password, 100);
-
-  // Begin WiFi
-  WiFi.begin(ssid, password);
-
-  //WiFi.softAPConfig(ip, gateway, subnet);
-  // Connecting to WiFi...
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.print(ssid);
-  Serial.println();
-  /*while (WiFi.status() != WL_CONNECTED)
-    {
-    delay(100);
-    Serial.print(".");
-    }
-
-    // Connected to WiFi
-    Serial.println();
-
+    Serial.println("Connected!");
     Serial.print("IP address for network ");
-    Serial.print(ssid);
+    Serial.print(ssidAP);
     Serial.print(" : ");
-    Serial.println(WiFi.localIP());*/
-  Serial.println("Connected!");
-  Serial.print("IP address for network ");
-  Serial.print(ssidAP);
-  Serial.print(" : ");
-  Serial.print(WiFi.softAPIP());
+    Serial.println(WiFi.softAPIP());
+    apStarted = 1;
+  }
 
+  if (leer(201) == "4" || leer(201) == "6") {
+    leer(0).toCharArray(ssid, 100);
+    leer(100).toCharArray(password, 100);
+
+    Serial.println(ssid);
+    Serial.println(password);
+    // Begin WiFi
+    WiFi.begin(ssid, password);
+  }
 }
