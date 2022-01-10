@@ -21,9 +21,9 @@ void setup(void)
   pinMode(GATE, OUTPUT);
   digitalWrite(GATE, LOW);
 
-  Serial.println(" ");
-  Serial.println(" ");
-  Serial.println(leer(201));
+  //Serial.println(" ");
+  //Serial.println(" ");
+  //Serial.println(leer(201));
 
 
   if (leer(201) == NULL) {
@@ -95,14 +95,11 @@ void loop()
     unnlockTime++;
   }
 
-
+  Serial.println(leer(202));
   if (leer(202) == "C") {
-    if (working == 1) {
-      i = 0;
-      working = 0;
-    }
+    
     if (i == 0) {
-      working = 1;
+      Serial.println("Start");
       grabar(202, "C");
       digitalWrite(GATE, HIGH);
       delay(100);
@@ -111,6 +108,7 @@ void loop()
 
     if (i == 3) {
       i = 0;
+      Serial.println("End Start");
       grabar(202, "q");
       grabar(201, "1");
     } else {
@@ -119,12 +117,7 @@ void loop()
 
   }
   if (leer(202) == "P") {
-    if (working == 1) {
-      i = 0;
-      working = 0;
-    }
     if (i == 0) {
-      working = 1;
       grabar(202, "P");
       digitalWrite(GATE, HIGH);
       delay(100);
@@ -138,10 +131,10 @@ void loop()
     }
 
     if (i == 9) {
+      i = 0;
       digitalWrite(GATE, HIGH);
       delay(100);
       digitalWrite(GATE, LOW);
-      i = 0;
       grabar(202, "q");
       grabar(201, "1");
     } else {
@@ -149,10 +142,6 @@ void loop()
     }
   }
   if (leer(202) == "M") {
-    if (working == 1) {
-      i = 0;
-      working = 0;
-    }
     if (i == 0) {
       working = 1;
       grabar(202, "M");
@@ -179,12 +168,7 @@ void loop()
     }
   }
   if (leer(202) == "A") {
-    if (working == 1) {
-      i = 0;
-      working = 0;
-    }
     if (i == 0) {
-      working = 1;
       grabar(202, "A");
       digitalWrite(GATE, HIGH);
       delay(100);
@@ -192,10 +176,10 @@ void loop()
     }
 
     if (i == 40) {
+      i = 0;
       digitalWrite(GATE, HIGH);
       delay(100);
       digitalWrite(GATE, LOW);
-      i = 0;
       grabar(202, "q");
       grabar(201, "1");
     } else {

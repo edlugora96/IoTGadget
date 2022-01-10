@@ -90,8 +90,8 @@ void actionRequest(AsyncWebServerRequest * request, uint8_t *data, size_t len, s
     request->send(200, "application/json", "{\"code\":500,\"data\":\"\", \"error\":\"Internal error\"}");
     return;
   }
-  Serial.print(String(doc["data"]));
-  if (leer(201) == "1") {
+  Serial.println(String(doc["data"]));
+  if (leer(201) != "2") {
     grabar(202, doc["data"]);
     
   }
