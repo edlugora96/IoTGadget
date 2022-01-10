@@ -106,7 +106,7 @@ void loop()
       digitalWrite(GATE, LOW);
     }
 
-    if (i =< 3) {
+    if (i <= 3) {
       i = 0;
       Serial.println("End Start");
       grabar(202, "q");
@@ -130,7 +130,7 @@ void loop()
       digitalWrite(GATE, LOW);
     }
 
-    if (i =< 9) {
+    if (i <= 9) {
       i = 0;
       digitalWrite(GATE, HIGH);
       delay(100);
@@ -156,7 +156,7 @@ void loop()
       digitalWrite(GATE, LOW);
     }
 
-    if (i =< 13) {
+    if (i <= 13) {
       digitalWrite(GATE, HIGH);
       delay(100);
       digitalWrite(GATE, LOW);
@@ -175,7 +175,7 @@ void loop()
       digitalWrite(GATE, LOW);
     }
 
-    if (i =< 40) {
+    if (i <= 40) {
       i = 0;
       digitalWrite(GATE, HIGH);
       delay(100);
