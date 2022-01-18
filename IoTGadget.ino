@@ -79,20 +79,19 @@ void loop()
 
   if (leerChar(202) == 'C')
   {
-
+   
     if (i == 0)
     {
-      Serial.println("Start");
+      
       grabarChar(202, 'C');
       digitalWrite(GATE, HIGH);
       delay(100);
       digitalWrite(GATE, LOW);
     }
 
-    if (i <= 3)
+    if (i >= 3)
     {
       i = 0;
-      Serial.println("End Start");
       grabarChar(202, 'q');
       grabarChar(201, '1');
     }
@@ -103,8 +102,10 @@ void loop()
   }
   if (leerChar(202) == 'P')
   {
+    Serial.println(i);
     if (i == 0)
     {
+      Serial.println("Start");
       grabarChar(202, 'P');
       digitalWrite(GATE, HIGH);
       delay(100);
@@ -118,9 +119,10 @@ void loop()
       digitalWrite(GATE, LOW);
     }
 
-    if (i <= 9)
+    if (i >= 9)
     {
       i = 0;
+      Serial.println("End Start");
       digitalWrite(GATE, HIGH);
       delay(100);
       digitalWrite(GATE, LOW);
@@ -150,7 +152,7 @@ void loop()
       digitalWrite(GATE, LOW);
     }
 
-    if (i <= 13)
+    if (i >= 13)
     {
       digitalWrite(GATE, HIGH);
       delay(100);
@@ -174,7 +176,7 @@ void loop()
       digitalWrite(GATE, LOW);
     }
 
-    if (i <= 40)
+    if (i >= 40)
     {
       i = 0;
       digitalWrite(GATE, HIGH);
