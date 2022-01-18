@@ -4,7 +4,7 @@
 #include <ArduinoJson.h>
 #include <EEPROM.h>
 
-#include "config.h"  // Sustituir con datos de vuestra red
+#include "config.h" // Sustituir con datos de vuestra red
 #include "ESP8266_Utils.hpp"
 #include "Net_Connections.hpp"
 #include "Server.hpp"
@@ -23,166 +23,168 @@ void setup(void)
 
   //Serial.println(" ");
   //Serial.println(" ");
-  //Serial.println(leer(201));
+  //Serial.println(leerChar(201));
 
-
-  if (leer(201) == NULL) {
-    grabar(201, "0");
+  if (leerChar(201) == NULL)
+  {
+    grabarChar(201, '0');
   }
   //resetESP();
-  //grabar(201, "3");
+  //grabarChar(201, '3');
   wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
   wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
   Serial.println(WiFi.softAPIP());
-  if (leer(201) == "0" || leer(201) == "3" || leer(201) == "4" || leer(201) == "6") {
+  if (leerChar(201) == '0' || leerChar(201) == '3' || leerChar(201) == '4' || leerChar(201) == '6')
+  {
     ConnectWiFi_STA_AP();
-  } else {
+  }
+  else
+  {
     ConnectWiFi_STA();
   }
 
   InitServer();
-
 }
-int unnlockTime = 0;
-int reconections = 0;
-int apFlag = 0;
-int i = 0;
-int working = 0;
 void loop()
 {
-  if (leer(201) == "1") {
-    if (WiFi.status() != WL_CONNECTED) {
-      ConnectWiFi_STA();
-    }
-  }
-  if (leer(201) == "3") {
-    if (WiFi.status() != WL_CONNECTED) {
-      if (reconections > 5) {
-        ConnectWiFi_STA_AP();
-      } else {
-        ConnectWiFi_STA();
-      }
-
-      reconections++;
-    } else {
-      reconections = 0;
-    }
-  } else {
-    reconections = 0;
-  }
-
-  if (leer(201) == "5") {
-    if (unnlockTime > 18) {
-      grabar(201, "1");
+  if (leerChar(236) == 'O')
+  {
+    ConnectWiFi_STA_AP();
+    if (unnlockTime > 60)
+    {
+      grabarChar(236, 'F');
       unnlockTime = 0;
-      //ESP.reset();
-    }
-    unnlockTime++;
-  }
-
-  if (leer(201) == "6") {
-    if (unnlockTime > 300 ) {
-      //grabar(201, "1");
-      apFlag = 0;
-      //WiFi.disconnect();
-      //ConnectWiFi_STA();
       ESP.reset();
     }
-    if (apFlag == 0) {
-      ConnectWiFi_STA_AP();
-      apFlag = 1;
-    }
     unnlockTime++;
   }
 
-  Serial.println(leer(202));
-  if (leer(202) == "C") {
-    
-    if (i == 0) {
+  if (leerChar(236) != 'O')
+  {
+    if (leerChar(201) == '1' || leerChar(201) == '3')
+    {
+      if (reconections > 5 || leerChar(237) == 'O')
+      {
+        ConnectWiFi_STA_AP();
+      }
+      else
+      {
+        if (apStarted == 1) {
+          ESP.reset();
+        }
+        ConnectWiFi_STA();
+      }
+    }
+  }
+
+  if (leerChar(202) == 'C')
+  {
+
+    if (i == 0)
+    {
       Serial.println("Start");
-      grabar(202, "C");
+      grabarChar(202, 'C');
       digitalWrite(GATE, HIGH);
       delay(100);
       digitalWrite(GATE, LOW);
     }
 
-    if (i <= 3) {
+    if (i <= 3)
+    {
       i = 0;
       Serial.println("End Start");
-      grabar(202, "q");
-      grabar(201, "1");
-    } else {
+      grabarChar(202, 'q');
+      grabarChar(201, '1');
+    }
+    else
+    {
       i++;
     }
-
   }
-  if (leer(202) == "P") {
-    if (i == 0) {
-      grabar(202, "P");
+  if (leerChar(202) == 'P')
+  {
+    if (i == 0)
+    {
+      grabarChar(202, 'P');
       digitalWrite(GATE, HIGH);
       delay(100);
       digitalWrite(GATE, LOW);
     }
 
-    if (i == 6) {
+    if (i == 6)
+    {
       digitalWrite(GATE, HIGH);
       delay(100);
       digitalWrite(GATE, LOW);
     }
 
-    if (i <= 9) {
+    if (i <= 9)
+    {
       i = 0;
       digitalWrite(GATE, HIGH);
       delay(100);
       digitalWrite(GATE, LOW);
-      grabar(202, "q");
-      grabar(201, "1");
-    } else {
+      grabarChar(202, 'q');
+      grabarChar(201, '1');
+    }
+    else
+    {
       i++;
     }
   }
-  if (leer(202) == "M") {
-    if (i == 0) {
+  if (leerChar(202) == 'M')
+  {
+    if (i == 0)
+    {
       working = 1;
-      grabar(202, "M");
+      grabarChar(202, 'M');
       digitalWrite(GATE, HIGH);
       delay(100);
       digitalWrite(GATE, LOW);
     }
 
-    if (i == 6) {
+    if (i == 6)
+    {
       digitalWrite(GATE, HIGH);
       delay(100);
       digitalWrite(GATE, LOW);
     }
 
-    if (i <= 13) {
+    if (i <= 13)
+    {
       digitalWrite(GATE, HIGH);
       delay(100);
       digitalWrite(GATE, LOW);
       i = 0;
-      grabar(202, "q");
-      grabar(201, "1");
-    } else {
+      grabarChar(202, 'q');
+      grabarChar(201, '1');
+    }
+    else
+    {
       i++;
     }
   }
-  if (leer(202) == "A") {
-    if (i == 0) {
-      grabar(202, "A");
+  if (leerChar(202) == 'A')
+  {
+    if (i == 0)
+    {
+      grabarChar(202, 'A');
       digitalWrite(GATE, HIGH);
       delay(100);
       digitalWrite(GATE, LOW);
     }
 
-    if (i <= 40) {
+    if (i <= 40)
+    {
       i = 0;
       digitalWrite(GATE, HIGH);
       delay(100);
       digitalWrite(GATE, LOW);
-      grabar(202, "q");
-      grabar(201, "1");
-    } else {
+      grabarChar(202, 'q');
+      grabarChar(201, '1');
+    }
+    else
+    {
       i++;
     }
   }

@@ -4,9 +4,21 @@ AsyncWebServer server(80);
 
 void control(AsyncWebServerRequest *request) {
   Serial.println("Llego informacion");
+  
+  if (leerChar(201) == '5')
+  {
+    grabarChar(201, '1');
+  }
+  
   AsyncResponseStream *response = request->beginResponseStream("application/json");
-  request->send(200, "application/json", "{\"code\":200,\"data\":\"" + leer(300) + "\", \"wifi\":\"" + leer(0) + "\",  \"error\":\"\"}");
-
+  if (WiFi.status() == WL_CONNECTED && leerChar(201) != '0') {
+    Serial.println(WiFi.localIP());
+    String ip_lcl = IpAddress2String(WiFi.localIP());
+    grabar(300, ip_lcl);
+    request->send(200, "application/json", "{\"code\":200,\"data\":\"" + ip_lcl + "\", \"wifi\":\"" + leer(0) + "\",  \"error\":\"\"}");
+  } else {
+    request->send(200, "application/json", "{\"code\":200,\"data\":\"" + leer(300) + "\", \"wifi\":\"" + leer(0) + "\",  \"error\":\"\"}");
+  }
 }
 
 void feedRequest(AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total)
@@ -14,7 +26,8 @@ void feedRequest(AsyncWebServerRequest * request, uint8_t *data, size_t len, siz
   String bodyContent = GetBodyContent(data, len);
   StaticJsonDocument<200> doc;
   DeserializationError error = deserializeJson(doc, bodyContent);
-  if (error) {
+  if (error)
+  {
     request->send(200, "application/json", "{\"code\":500,\"data\":\"\", \"error\":\"Internal error\"}");
     return;
   }
@@ -25,9 +38,7 @@ void feedRequest(AsyncWebServerRequest * request, uint8_t *data, size_t len, siz
   grabar(100, doc["feed"]["pass"]);
   grabar(300, "0");
 
-  Serial.println("SSID grabado en la EPROM");
-  grabar(201, "4");
-  Serial.println("EPROM: state = 4");
+  grabarChar(201, '4');
   //}
   WiFi.disconnect();
   ConnectWiFi_STA_AP();
@@ -40,18 +51,18 @@ void feedRequest(AsyncWebServerRequest * request, uint8_t *data, size_t len, siz
 
 void resetRequest(AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total)
 {
-  Serial.println("Llego reset");
   String bodyContent = GetBodyContent(data, len);
   StaticJsonDocument<200> doc;
   DeserializationError error = deserializeJson(doc, bodyContent);
-  if (error) {
+  if (error)
+  {
     request->send(200, "application/json", "{\"code\":500,\"data\":\"\", \"error\":\"Internal error\"}");
     return;
   }
 
-
   String string_data = doc["data"];
-  if (doc["data"] == moduleId) {
+  if (doc["data"] == moduleId)
+  {
     request->send(200, "application/json", "{\"code\":200,\"data\":\"Success\", \"error\":\"\"}");
     resetESP();
     return;
@@ -60,20 +71,21 @@ void resetRequest(AsyncWebServerRequest * request, uint8_t *data, size_t len, si
 
 void unlockRequest(AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total)
 {
-  Serial.println("Llego desbloquear");
   String bodyContent = GetBodyContent(data, len);
   StaticJsonDocument<200> doc;
   DeserializationError error = deserializeJson(doc, bodyContent);
-  if (error) {
+  if (error)
+  {
     request->send(200, "application/json", "{\"code\":500,\"data\":\"\", \"error\":\"Internal error\"}");
     return;
   }
 
-
   String string_data = doc["data"];
-  if (doc["data"] == moduleId) {
-    grabar(201, "6");
+  if (doc["data"] == moduleId)
+  {
+    grabarChar(236, 'O');
     request->send(200, "application/json", "{\"code\":200,\"data\":\"Success\", \"error\":\"\"}");
+    //ESP.reset();
     return;
   }
 }
@@ -93,7 +105,7 @@ void actionRequest(AsyncWebServerRequest * request, uint8_t *data, size_t len, s
   Serial.println(String(doc["data"]));
   if (leer(201) != "2") {
     grabar(202, doc["data"]);
-    
+
   }
   if (leer(201) == "2") {
     request->send(200, "application/json", "{\"code\":400,\"data\":\"Busy\", \"error\":\"\"}");
@@ -136,29 +148,58 @@ void onWifiConnect(const WiFiEventStationModeGotIP& event) {
   Serial.println("Connected to Wi-Fi sucessfully.");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-  if (leer(201) != "4" && leer(201) != "6") {
-    grabar(201, "1");
-  } else if (leer(201) == "4" && leer(201) != "6") {
-    grabar(201, "5");
+
+  IPAddress local_IP_test;
+  local_IP_test.fromString(leer(300));
+  if (leer(300) != "0") {
+    if (WiFi.localIP().toString() != local_IP_test.toString()) {
+      Serial.print("Que shit pasa con la ip?");
+      grabarChar(237, 'O');
+    }
+
+    if (WiFi.localIP().toString() == local_IP_test.toString()) {
+      Serial.print("Estan bien las Ip");
+      grabarChar(237, 'F');
+    }
   }
-  String ip = IpAddress2String(WiFi.localIP());
-  grabar(300, ip);
+
+  Serial.println(leerChar(201));
+  if (leerChar(201) != '4' && leerChar(201) != '6')
+  {
+    grabarChar(201, '1');
+  }
+  else if (leerChar(201) == '4' && leerChar(201) != '6')
+  {
+    Serial.println("Ya esta configurado");
+    grabarChar(201, '5');
+  }
+
+  if (leerChar(201) == '0' || leerChar(201) == '5') {
+    Serial.println("Ip Guardada");
+    String ip_lcl = IpAddress2String(WiFi.localIP());
+    grabar(300, ip_lcl);
+  }
+  if (reconections > 5) {
+    ESP.reset();
+  }
+  reconections = 0;
 }
 
 void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
   Serial.println();
-  if (leer(201) != "4") {
-    grabar(201, "3");
+  if (leerChar(201) != '4')
+  {
+    grabarChar(201, '3');
   }
   /*if (leer(201) == "6") {
     ESP.reset();
-  }
-  else {
+    }
+    else {
     ConnectWiFi_STA_AP();
     }*/
-
+  reconections++;
   //grabar(300, "0");
   Serial.println("Disconnected from Wi-Fi, trying to connect...");
-  //WiFi.disconnect();
+  WiFi.disconnect();
   //WiFi.begin(ssid, password);
 }

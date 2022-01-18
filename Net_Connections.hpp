@@ -1,29 +1,39 @@
+int reconnetionWifiLimit = 100;
+
 //-----------------Función Coneccion STA------------------------
 void ConnectWiFi_STA(bool useStaticIP = false)
 {
-  leer(0).toCharArray(ssid, 100);
-  leer(100).toCharArray(password, 100);
-  Serial.println("");
-  IPAddress local_IP;
-  local_IP.fromString(leer(300));
-  Serial.println(local_IP);
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  WiFi.config(local_IP, gateway, subnet);
-  apStarted = 0;
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(100);
-    Serial.print('.');
-  }
-  grabar(201, "1");
-  Serial.println("");
-  Serial.print("Iniciado STA:\t");
-  Serial.println(ssid);
-  Serial.print("IP address:\t");
-  Serial.println(WiFi.localIP());
-}
+  if (WiFi.status() != WL_CONNECTED) {
+    leer(0).toCharArray(ssid, 100);
+    leer(100).toCharArray(password, 100);
+    Serial.println(reconections);
+    Serial.print("Ip stored // before to connect: ");
+    IPAddress local_IP;
+    local_IP.fromString(leer(300));
+    Serial.println(local_IP);
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, password);
+    WiFi.config(local_IP, gateway, subnet);
+    apStarted = 0;
+    int timeToReconnect = 0;
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      delay(100);
+      if (timeToReconnect > reconnetionWifiLimit) {
+        break;
+      }
+      Serial.print('.');
+      timeToReconnect++;
 
+    }
+    grabarChar(201, '1');
+    Serial.println("");
+    Serial.print("Iniciado STA:\t");
+    Serial.println(ssid);
+    Serial.print("IP address:\t");
+    Serial.println(WiFi.localIP());
+  }
+}
 
 
 //-----------------Función Coneccion AP------------------------
@@ -61,13 +71,23 @@ void ConnectWiFi_STA_AP() {
     apStarted = 1;
   }
 
-  if (leer(201) == "4" || leer(201) == "6") {
-    leer(0).toCharArray(ssid, 100);
-    leer(100).toCharArray(password, 100);
+  if (leerChar(201) != '0') {
+  leer(0).toCharArray(ssid, 100);
+  leer(100).toCharArray(password, 100);
+  // Begin WiFi
+  WiFi.begin(ssid, password);
+  if (leerChar(201) != '4') {
+    int timeToReconnect = 0;
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      delay(100);
+      if (timeToReconnect > reconnetionWifiLimit) {
+        break;
+      }
+      Serial.print('.');
+      timeToReconnect++;
+    }
+  }
 
-    Serial.println(ssid);
-    Serial.println(password);
-    // Begin WiFi
-    WiFi.begin(ssid, password);
   }
 }
