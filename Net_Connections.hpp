@@ -3,7 +3,8 @@ int reconnetionWifiLimit = 100;
 //-----------------Función Coneccion STA------------------------
 void ConnectWiFi_STA(bool useStaticIP = false)
 {
-  if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED)
+  {
     leer(0).toCharArray(ssid, 100);
     leer(100).toCharArray(password, 100);
     Serial.println(reconections);
@@ -19,12 +20,12 @@ void ConnectWiFi_STA(bool useStaticIP = false)
     while (WiFi.status() != WL_CONNECTED)
     {
       delay(100);
-      if (timeToReconnect > reconnetionWifiLimit) {
+      if (timeToReconnect > reconnetionWifiLimit)
+      {
         break;
       }
       Serial.print('.');
       timeToReconnect++;
-
     }
     grabarChar(201, '1');
     Serial.println("");
@@ -34,7 +35,6 @@ void ConnectWiFi_STA(bool useStaticIP = false)
     Serial.println(WiFi.localIP());
   }
 }
-
 
 //-----------------Función Coneccion AP------------------------
 void ConnectWiFi_AP(bool useStaticIP = false)
@@ -55,11 +55,11 @@ void ConnectWiFi_AP(bool useStaticIP = false)
   Serial.println(WiFi.softAPIP());
 }
 
-
-
 //-----------------Función Coneccion STA_AP------------------------
-void ConnectWiFi_STA_AP() {
-  if (apStarted == 0) {
+void ConnectWiFi_STA_AP()
+{
+  if (apStarted == 0)
+  {
     WiFi.mode(WIFI_AP_STA);
     WiFi.softAP(ssidAP, passwordAP);
 
@@ -71,23 +71,25 @@ void ConnectWiFi_STA_AP() {
     apStarted = 1;
   }
 
-  if (leerChar(201) != '0') {
-  leer(0).toCharArray(ssid, 100);
-  leer(100).toCharArray(password, 100);
-  // Begin WiFi
-  WiFi.begin(ssid, password);
-  if (leerChar(201) != '4') {
-    int timeToReconnect = 0;
-    while (WiFi.status() != WL_CONNECTED)
+  if (leerChar(201) != '0')
+  {
+    leer(0).toCharArray(ssid, 100);
+    leer(100).toCharArray(password, 100);
+    // Begin WiFi
+    WiFi.begin(ssid, password);
+    if (leerChar(201) != '4')
     {
-      delay(100);
-      if (timeToReconnect > reconnetionWifiLimit) {
-        break;
+      int timeToReconnect = 0;
+      while (WiFi.status() != WL_CONNECTED)
+      {
+        delay(100);
+        if (timeToReconnect > reconnetionWifiLimit)
+        {
+          break;
+        }
+        Serial.print('.');
+        timeToReconnect++;
       }
-      Serial.print('.');
-      timeToReconnect++;
     }
-  }
-
   }
 }
