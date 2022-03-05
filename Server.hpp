@@ -112,7 +112,6 @@ void actionRequest(AsyncWebServerRequest *request, uint8_t *data, size_t len, si
     String respInStr = doc["data"];
     grabarChar(202, respInStr[0]);
   }
-  grabarChar(299, 'O');
   if (leerChar(201) == '2')
   {
     request->send(200, "application/json", "{\"code\":400,\"data\":\"Busy\", \"error\":\"\"}");
